@@ -1,7 +1,7 @@
 package main
 
-import "github.com/awile/datamkr/pkg/cmd"
+import "github.com/awile/datamkr/pkg/cli"
 
 func main() {
-    cmd.Execute()
+	cli.Execute()
 }
