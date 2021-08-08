@@ -20,9 +20,9 @@ func AddInitCmd() *cobra.Command {
                 log.Fatal(err)
             }
 
-            msg := fmt.Sprintf("Creating config file at %s", config.ConfigFileLocation)
+            msg := fmt.Sprintf("Creating config file: %s", config.ConfigFileName)
             if hasConfigFile {
-                msg = fmt.Sprintf("Config file already exists at %s", config.ConfigFileLocation)
+                msg = fmt.Sprintf("Config file already exists at %s", config.ConfigFileName)
             }
             fmt.Println(msg)
         },
