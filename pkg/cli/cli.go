@@ -17,11 +17,11 @@ package cli
 
 import (
 	"fmt"
-	"os"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"os"
 
-    initCommand "github.com/awile/datamkr/pkg/cli/init"
+	initCommand "github.com/awile/datamkr/pkg/cli/init"
 )
 
 var cfgFile string
@@ -30,8 +30,8 @@ var cfgFile string
 var rootCmd = &cobra.Command{
 	Use:   "datamkr",
 	Short: "A brief description of your application",
-	Long: `A Command line tool for mock data generation`,
-    // Uncomment the following line if your bare application
+	Long:  `A Command line tool for mock data generation`,
+	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
 }
@@ -43,13 +43,13 @@ func Execute() {
 }
 
 func addCommands() {
-    rootCmd.AddCommand(initCommand.AddInitCmd())
+	rootCmd.AddCommand(initCommand.AddInitCmd())
 }
 
 func init() {
 	cobra.OnInitialize(initConfig)
 
-    addCommands()
+	addCommands()
 
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,

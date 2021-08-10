@@ -1,8 +1,8 @@
 package config
 
 import (
-    "os"
-    "github.com/go-yaml/yaml"
+	"github.com/go-yaml/yaml"
+	"os"
 )
 
 const ConfigFilePath = "./"
@@ -27,37 +27,37 @@ func CreateDatamkrConfigFile() (bool, error) {
 }
 
 func currentDirHasConfigFile() (bool, error) {
-    _, err := os.Stat(ConfigFileLocation)
-    if (os.IsNotExist(err)) {
-        return false, nil
-    } else if (err != nil) {
-        return true, err
-    } else {
-        return true, nil
-    }
+	_, err := os.Stat(ConfigFileLocation)
+	if os.IsNotExist(err) {
+		return false, nil
+	} else if err != nil {
+		return true, err
+	} else {
+		return true, nil
+	}
 }
 
 func createConfigFile() (*os.File, error) {
-    return os.Create(ConfigFileLocation)
+	return os.Create(ConfigFileLocation)
 }
 
 func initDatamkrConfigFile() error {
-    config := DatamakrConfig{DatasetsDir: "test/datasets"}
-    f, createErr := createConfigFile()
-    if (createErr != nil) {
-        return createErr
-    }
+	config := DatamakrConfig{DatasetsDir: "test/datasets"}
+	f, createErr := createConfigFile()
+	if createErr != nil {
+		return createErr
+	}
 
-    defer f.Close()
+	defer f.Close()
 
-    configString, marshalErr := yaml.Marshal(&config)
-    if (marshalErr != nil) {
-        return marshalErr
-    }
+	configString, marshalErr := yaml.Marshal(&config)
+	if marshalErr != nil {
+		return marshalErr
+	}
 
-    _, writeErr := f.Write(append([]byte("---\n"), configString...))
-    if (writeErr != nil) {
-        return writeErr
-    }
-    return nil
+	_, writeErr := f.Write(append([]byte("---\n"), configString...))
+	if writeErr != nil {
+		return writeErr
+	}
+	return nil
 }
