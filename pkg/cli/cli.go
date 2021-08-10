@@ -17,9 +17,10 @@ package cli
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
 
 	initCommand "github.com/awile/datamkr/pkg/cli/init"
 )
@@ -43,7 +44,7 @@ func Execute() {
 }
 
 func addCommands() {
-	rootCmd.AddCommand(initCommand.AddInitCmd())
+	rootCmd.AddCommand(initCommand.NewInitCmd())
 }
 
 func init() {
