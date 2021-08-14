@@ -7,10 +7,12 @@ import (
 	utils "github.com/awile/datamkr/pkg/cli/util"
 	"github.com/awile/datamkr/pkg/config"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 type InitOptions struct {
-	factory config.ConfigFactory
+	HasConfig bool
+	factory   config.ConfigFactory
 }
 
 func NewInitOptions() *InitOptions {
@@ -40,6 +42,8 @@ func NewInitCmd() *cobra.Command {
 }
 
 func (options *InitOptions) Complete(cmd *cobra.Command, args []string) error {
+	version := viper.Get("version")
+	options.HasConfig = version != nil
 	return nil
 }
 
@@ -48,17 +52,12 @@ func (options *InitOptions) Validate() error {
 }
 
 func (options *InitOptions) Run() error {
-	hasConfigFile, err := options.factory.HasConfigInDirectory()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if hasConfigFile {
+	if options.HasConfig {
 		fmt.Println("Config file already exists at ./datamkr.yml")
 		return nil
 	}
 	configFile := options.factory.CreateNewConfigFile()
-	err = options.factory.InitDatamkrConfigFile(configFile)
+	err := options.factory.InitDatamkrConfigFile(configFile)
 	if err != nil {
 		log.Fatal(err)
 	}

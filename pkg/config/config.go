@@ -21,19 +21,21 @@ type ConfigFactory interface {
 
 type DatamkrConfigFactory struct {
 	config       DatamkrConfig
-	fileLocation string
+	FileLocation string
 }
 
 func NewDatamkrConfigFactory() (*DatamkrConfigFactory, error) {
-	return &DatamkrConfigFactory{fileLocation: "./datamkr.yml"}, nil
+	return &DatamkrConfigFactory{FileLocation: "./.datamkr.yml"}, nil
 }
 
 func (dcf *DatamkrConfigFactory) ConfigToByteString() ([]byte, error) {
-	return yaml.Marshal(&dcf.config)
+	wrappedConfig := make(map[string]DatamkrConfig)
+	wrappedConfig["datamkr"] = dcf.config
+	return yaml.Marshal(&wrappedConfig)
 }
 
 func (dcf *DatamkrConfigFactory) HasConfigInDirectory() (bool, error) {
-	_, err := os.Stat(dcf.fileLocation)
+	_, err := os.Stat(dcf.FileLocation)
 	if err == nil {
 		return true, nil
 	}
@@ -51,10 +53,11 @@ func (dcf *DatamkrConfigFactory) InitDatamkrConfigFile(configFile io.Writer) err
 		return err
 	}
 
-	_, err = configFile.Write([]byte("---\n"))
+	_, err = configFile.Write([]byte("version: 2\n\n"))
 	if err != nil {
 		return err
 	}
+
 	_, err = configFile.Write(configByteString)
 	if err != nil {
 		return err
@@ -63,10 +66,9 @@ func (dcf *DatamkrConfigFactory) InitDatamkrConfigFile(configFile io.Writer) err
 }
 
 func (dcf *DatamkrConfigFactory) CreateNewConfigFile() io.Writer {
-	configFile, err := os.Create(dcf.fileLocation)
+	configFile, err := os.Create(dcf.FileLocation)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer configFile.Close()
 	return configFile
 }
