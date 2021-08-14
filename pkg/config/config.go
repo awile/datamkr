@@ -12,6 +12,13 @@ type DatamkrConfig struct {
 	DatasetsDir string `yaml:"datasetsDir"`
 }
 
+type ConfigFactory interface {
+	ConfigToByteString() ([]byte, error)
+	HasConfigInDirectory() (bool, error)
+	InitDatamkrConfigFile(configFile io.Writer) error
+	CreateNewConfigFile() io.Writer
+}
+
 type DatamkrConfigFactory struct {
 	config       DatamkrConfig
 	fileLocation string
@@ -57,9 +64,9 @@ func (dcf *DatamkrConfigFactory) InitDatamkrConfigFile(configFile io.Writer) err
 
 func (dcf *DatamkrConfigFactory) CreateNewConfigFile() io.Writer {
 	configFile, err := os.Create(dcf.fileLocation)
-	defer configFile.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer configFile.Close()
 	return configFile
 }

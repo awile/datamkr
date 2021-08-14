@@ -10,7 +10,7 @@ import (
 )
 
 type InitOptions struct {
-	factory *config.DatamkrConfigFactory
+	factory config.ConfigFactory
 }
 
 func NewInitOptions() *InitOptions {
