@@ -22,7 +22,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	datasetCommand "github.com/awile/datamkr/pkg/cli/dataset"
 	initCommand "github.com/awile/datamkr/pkg/cli/init"
+	"github.com/awile/datamkr/pkg/config"
 )
 
 var cfgFile string
@@ -44,7 +46,9 @@ func Execute() {
 }
 
 func addCommands() {
-	rootCmd.AddCommand(initCommand.NewInitCmd())
+	c, _ := config.NewDatamkrConfigFactory()
+	rootCmd.AddCommand(initCommand.NewInitCmd(c))
+	rootCmd.AddCommand(datasetCommand.NewDatasetCmd(c))
 }
 
 func init() {

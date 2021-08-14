@@ -19,6 +19,11 @@ type MockDatamkrConfigFactory struct {
 	mock.Mock
 }
 
+func (m *MockDatamkrConfigFactory) GetConfig() (*DatamkrConfig, error) {
+	args := m.Called()
+	return args.Get(0).(*DatamkrConfig), args.Error(1)
+}
+
 func (m *MockDatamkrConfigFactory) ConfigToByteString() ([]byte, error) {
 	args := m.Called()
 	return []byte(args.String(0)), args.Error(1)

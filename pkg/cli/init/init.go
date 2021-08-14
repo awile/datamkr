@@ -23,7 +23,7 @@ func NewInitOptions() *InitOptions {
 	return &InitOptions{factory: dcf}
 }
 
-func NewInitCmd() *cobra.Command {
+func NewInitCmd(configFactory *config.DatamkrConfigFactory) *cobra.Command {
 	initOptions := NewInitOptions()
 
 	cmd := &cobra.Command{
@@ -59,7 +59,7 @@ func (options *InitOptions) Run() error {
 	configFile := options.factory.CreateNewConfigFile()
 	err := options.factory.InitDatamkrConfigFile(configFile)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	fmt.Println("Config file created.")
 	return nil

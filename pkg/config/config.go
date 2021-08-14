@@ -6,13 +6,25 @@ import (
 	"os"
 
 	"github.com/go-yaml/yaml"
+	"github.com/spf13/viper"
 )
 
 type DatamkrConfig struct {
 	DatasetsDir string `yaml:"datasetsDir"`
 }
 
+func NewConfig() *DatamkrConfig {
+	var config DatamkrConfig
+
+	settings := viper.GetStringMap("datamkr")
+
+	config.DatasetsDir = settings["datasetsdir"].(string)
+
+	return &config
+}
+
 type ConfigFactory interface {
+	GetConfig() (*DatamkrConfig, error)
 	ConfigToByteString() ([]byte, error)
 	HasConfigInDirectory() (bool, error)
 	InitDatamkrConfigFile(configFile io.Writer) error
@@ -71,4 +83,8 @@ func (dcf *DatamkrConfigFactory) CreateNewConfigFile() io.Writer {
 		log.Fatal(err)
 	}
 	return configFile
+}
+
+func (dcf *DatamkrConfigFactory) GetConfig() (*DatamkrConfig, error) {
+	return NewConfig(), nil
 }
