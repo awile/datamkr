@@ -2,14 +2,11 @@ package dataset
 
 import (
 	utils "github.com/awile/datamkr/pkg/cli/util"
-	"github.com/awile/datamkr/pkg/client"
 	"github.com/awile/datamkr/pkg/config"
 	"github.com/spf13/cobra"
 )
 
 type DatasetOptions struct {
-	factory       config.ConfigFactory
-	datamkrClient client.Interface
 }
 
 func NewDatasetOptions(factory *config.DatamkrConfigFactory) *DatasetOptions {

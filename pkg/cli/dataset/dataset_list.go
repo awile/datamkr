@@ -51,7 +51,14 @@ func (opt *DatasetListOptions) Validate() error {
 }
 
 func (opt *DatasetListOptions) Run() error {
-	d := opt.datamkrClient.Datasets()
-	fmt.Println(d.List())
+	datasetService := opt.datamkrClient.Datasets()
+	datasets, err := datasetService.List()
+	if err != nil {
+		return err
+	}
+
+	for _, d := range datasets {
+		fmt.Println((d))
+	}
 	return nil
 }
