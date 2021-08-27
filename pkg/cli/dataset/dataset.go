@@ -29,6 +29,7 @@ func NewDatasetCmd(configFactory *config.DatamkrConfigFactory) *cobra.Command {
 	}
 
 	cmd.AddCommand(NewDatasetListCmd(configFactory))
+	cmd.AddCommand(NewDatasetAddCmd(configFactory))
 
 	return cmd
 }
