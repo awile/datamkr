@@ -2,15 +2,20 @@ package dataset
 
 import (
 	"errors"
+	"strings"
 
 	utils "github.com/awile/datamkr/pkg/cli/util"
 	"github.com/awile/datamkr/pkg/client"
 	"github.com/awile/datamkr/pkg/config"
+	"github.com/awile/datamkr/pkg/dataset"
 	"github.com/spf13/cobra"
 )
 
 type DatasetAddOptions struct {
 	DatasetName string
+	Definition  dataset.DatasetDefinition
+
+	Fieldslist []string
 
 	factory       config.ConfigFactory
 	datamkrClient client.Interface
@@ -35,6 +40,12 @@ func NewDatasetAddCmd(configFactory *config.DatamkrConfigFactory) *cobra.Command
 		},
 	}
 
+	cmd.Flags().StringArrayVar(
+		&datasetAddOptions.Fieldslist,
+		"field",
+		datasetAddOptions.Fieldslist,
+		"Add fields to dataset definition. (e.g. making adding two fields: --field key1=value1,key2=value2 --field key3=value3)",
+	)
 	return cmd
 }
 
@@ -44,6 +55,14 @@ func (opt *DatasetAddOptions) Complete(cmd *cobra.Command, args []string) error 
 	} else {
 		opt.DatasetName = args[0]
 	}
+
+	var datasetDefinition dataset.DatasetDefinition
+
+	if len(opt.Fieldslist) > 0 {
+		datasetDefinition.Fields = parseDatasetDefinitionFields(opt.Fieldslist)
+	}
+
+	opt.Definition = datasetDefinition
 
 	currentConfig, err := opt.factory.GetConfig()
 	if err != nil {
@@ -63,5 +82,26 @@ func (opt *DatasetAddOptions) Validate() error {
 
 func (opt *DatasetAddOptions) Run() error {
 	datasetClient := opt.datamkrClient.Datasets()
-	return datasetClient.Add(opt.DatasetName)
+	return datasetClient.Add(opt.DatasetName, opt.Definition)
+}
+
+func parseDatasetDefinitionFields(fields []string) map[string]dataset.DatasetDefinitionField {
+	definitionFields := make(map[string]dataset.DatasetDefinitionField)
+	for _, fieldStr := range fields {
+		var name string
+		var field dataset.DatasetDefinitionField
+		for _, keyValuePair := range strings.Split(fieldStr, ",") {
+			pair := strings.Split(keyValuePair, "=")
+			key := strings.TrimSpace(pair[0])
+			value := strings.TrimSpace(pair[1])
+			if key == "name" {
+				name = value
+			} else if key == "type" {
+				field.Type = value
+			}
+		}
+
+		definitionFields[name] = field
+	}
+	return definitionFields
 }

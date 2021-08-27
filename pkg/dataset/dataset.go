@@ -9,7 +9,7 @@ import (
 )
 
 type DatasetClientInterface interface {
-	Add(name string) error
+	Add(name string, definition DatasetDefinition) error
 	List() ([]string, error)
 }
 
@@ -35,7 +35,7 @@ func (dc *DatasetClient) List() ([]string, error) {
 	return datasets, nil
 }
 
-func (dc *DatasetClient) Add(name string) error {
+func (dc *DatasetClient) Add(name string, definition DatasetDefinition) error {
 	filePath := fmt.Sprintf("%s/%s.yml", dc.config.DatasetsDir, name)
 
 	fileExists, err := dc.storageService.Exists(filePath)
@@ -46,7 +46,7 @@ func (dc *DatasetClient) Add(name string) error {
 		return fmt.Errorf("Dataset already exists at: %s\n", filePath)
 	}
 
-	fileContents, err := dc.getDatasetFileContent(name)
+	fileContents, err := dc.getDatasetFileContent(name, definition)
 	if err != nil {
 		return err
 	}
@@ -54,15 +54,8 @@ func (dc *DatasetClient) Add(name string) error {
 	return dc.storageService.Write(filePath, fileContents)
 }
 
-func (dc *DatasetClient) getDatasetFileContent(name string) ([]byte, error) {
-	fieldMap := make(map[string]DatasetDefinitionField)
-	fieldMap["id"] = DatasetDefinitionField{Type: "uuid"}
-	fieldMap["full_name"] = DatasetDefinitionField{Type: "string"}
-	fieldMap["age"] = DatasetDefinitionField{Type: "number"}
-
-	datasetDefinition := DatasetDefinition{Fields: fieldMap}
-
+func (dc *DatasetClient) getDatasetFileContent(name string, definition DatasetDefinition) ([]byte, error) {
 	definitionDescription := make(map[string]DatasetDefinition)
-	definitionDescription[name] = datasetDefinition
+	definitionDescription[name] = definition
 	return yaml.Marshal(&definitionDescription)
 }
