@@ -44,7 +44,7 @@ func NewDatasetAddCmd(configFactory *config.DatamkrConfigFactory) *cobra.Command
 		&datasetAddOptions.Fieldslist,
 		"field",
 		datasetAddOptions.Fieldslist,
-		"Add fields to dataset definition. (e.g. making adding two fields: --field key1=value1,key2=value2 --field key3=value3)",
+		"Define definition fields (e.g. --field key1=value1,key2=value2 --field key3=value3)",
 	)
 	return cmd
 }
