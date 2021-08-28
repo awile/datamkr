@@ -24,6 +24,7 @@ import (
 
 	datasetCommand "github.com/awile/datamkr/pkg/cli/dataset"
 	initCommand "github.com/awile/datamkr/pkg/cli/init"
+	makeCommand "github.com/awile/datamkr/pkg/cli/make"
 	"github.com/awile/datamkr/pkg/config"
 )
 
@@ -49,6 +50,7 @@ func addCommands() {
 	c, _ := config.NewDatamkrConfigFactory()
 	rootCmd.AddCommand(initCommand.NewInitCmd(c))
 	rootCmd.AddCommand(datasetCommand.NewDatasetCmd(c))
+	rootCmd.AddCommand(makeCommand.NewMakeCmd(c))
 }
 
 func init() {

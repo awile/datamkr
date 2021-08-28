@@ -68,7 +68,7 @@ func (ls *LocalStorage) getFileToWrite(filePath string) (io.Writer, error) {
 	}
 
 	if fileExists {
-		return os.OpenFile(filePath, os.O_RDWR, 0644)
+		return os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY, 0644)
 	}
 	return os.Create(filePath)
 }
@@ -77,6 +77,7 @@ func (ls *LocalStorage) Read(filePath string) ([]byte, error) {
 	return os.ReadFile(filePath)
 }
 
-func (ls *LocalStorage) getFileToRead(filePath string) (io.Reader, error) {
-	return os.Open(filePath)
+func (ls *LocalStorage) Create(filePath string) error {
+	_, err := os.Create(filePath)
+	return err
 }

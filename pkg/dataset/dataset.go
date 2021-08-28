@@ -74,7 +74,19 @@ func (dc *DatasetClient) Get(name string) (DatasetDefinition, error) {
 		return datasetDefinition, err
 	}
 	if !fileExists {
-		return datasetDefinition, fmt.Errorf("Dataset %s does not already exists, create with: datamkr add %s\n", filePath, filePath)
+		return datasetDefinition, fmt.Errorf("Dataset does not already exists at %s\ncreate with: datamkr add %s\n", filePath, name)
 	}
+
+	definitionBytes, err := dc.storageService.Read(filePath)
+	if err != nil {
+		return datasetDefinition, err
+	}
+
+	var definitionFile map[string]DatasetDefinition
+	err = yaml.Unmarshal(definitionBytes, &definitionFile)
+	if err != nil {
+		return datasetDefinition, err
+	}
+	datasetDefinition = definitionFile[name]
 	return datasetDefinition, nil
 }
