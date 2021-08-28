@@ -72,3 +72,11 @@ func (ls *LocalStorage) getFileToWrite(filePath string) (io.Writer, error) {
 	}
 	return os.Create(filePath)
 }
+
+func (ls *LocalStorage) Read(filePath string) ([]byte, error) {
+	return os.ReadFile(filePath)
+}
+
+func (ls *LocalStorage) getFileToRead(filePath string) (io.Reader, error) {
+	return os.Open(filePath)
+}

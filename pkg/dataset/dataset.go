@@ -10,6 +10,7 @@ import (
 
 type DatasetClientInterface interface {
 	Add(name string, definition DatasetDefinition) error
+	Get(name string) (DatasetDefinition, error)
 	List() ([]string, error)
 }
 
@@ -36,7 +37,7 @@ func (dc *DatasetClient) List() ([]string, error) {
 }
 
 func (dc *DatasetClient) Add(name string, definition DatasetDefinition) error {
-	filePath := fmt.Sprintf("%s/%s.yml", dc.config.DatasetsDir, name)
+	filePath := dc.getDatasetPath(name)
 
 	fileExists, err := dc.storageService.Exists(filePath)
 	if err != nil {
@@ -58,4 +59,22 @@ func (dc *DatasetClient) getDatasetFileContent(name string, definition DatasetDe
 	definitionDescription := make(map[string]DatasetDefinition)
 	definitionDescription[name] = definition
 	return yaml.Marshal(&definitionDescription)
+}
+
+func (dc *DatasetClient) getDatasetPath(name string) string {
+	return fmt.Sprintf("%s/%s.yml", dc.config.DatasetsDir, name)
+}
+
+func (dc *DatasetClient) Get(name string) (DatasetDefinition, error) {
+	var datasetDefinition DatasetDefinition
+	filePath := dc.getDatasetPath(name)
+
+	fileExists, err := dc.storageService.Exists(filePath)
+	if err != nil {
+		return datasetDefinition, err
+	}
+	if !fileExists {
+		return datasetDefinition, fmt.Errorf("Dataset %s does not already exists, create with: datamkr add %s\n", filePath, filePath)
+	}
+	return datasetDefinition, nil
 }
