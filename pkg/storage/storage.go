@@ -1,48 +1,44 @@
 package storage
 
 import (
-	"strings"
+	"fmt"
 
 	"github.com/awile/datamkr/pkg/config"
 )
 
-type StorageInterface interface {
-	Exists() (bool, error)
-	List() ([]string, error)
-	Write() error
-}
-
 type StorageClientInterface interface {
-	Init(filePath string) error
-	Insert(filePath string, row []string) error
+	GetStorageService(storageType string) (StorageServiceInterface, error)
 }
 
-type StorageClient struct {
-	config         *config.DatamkrConfig
-	storageService *LocalStorage
+type StorageServiceInterface interface {
+	Init(args interface{}) error
+	Write(data interface{}) error
+	WriteAll(data interface{}) error
+	Close() error
 }
 
-func NewWithConfig(config *config.DatamkrConfig) *StorageClient {
-	var sc StorageClient
+type StorageArgs struct {
+	FileName string
+	IsWriter bool
+}
+
+type storageClient struct {
+	config *config.DatamkrConfig
+}
+
+func NewWithConfig(config *config.DatamkrConfig) StorageClientInterface {
+	var sc storageClient
 
 	sc.config = config
-	sc.storageService = NewLocalStorage(config)
 
 	return &sc
 }
 
-func (sc *StorageClient) Init(filePath string) error {
-	fileExists, err := sc.storageService.Exists(filePath)
-	if err != nil {
-		return err
+func (sc *storageClient) GetStorageService(storageType string) (StorageServiceInterface, error) {
+	switch storageType {
+	case "csv":
+		return newCsvStorageWithConfig(sc.config), nil
+	default:
+		return nil, fmt.Errorf("No storage server %s found.", storageType)
 	}
-	if !fileExists {
-		sc.storageService.Create(filePath)
-	}
-	return nil
-}
-
-func (sc *StorageClient) Insert(filePath string, row []string) error {
-	stringArray := strings.Join(row, ",") + "\n"
-	return sc.storageService.Write(filePath, []byte(stringArray))
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/awile/datamkr/pkg/client"
 	"github.com/awile/datamkr/pkg/config"
 	"github.com/awile/datamkr/pkg/dataset"
+	"github.com/awile/datamkr/pkg/storage"
 	"github.com/spf13/cobra"
 )
 
@@ -42,6 +43,7 @@ func NewMakeCmd(configFactory *config.DatamkrConfigFactory) *cobra.Command {
 
 	cmd.Flags().Int32VarP(&makeOptions.NumberOfRows, "rows", "r", 10, "Number of rows to generate")
 	cmd.Flags().StringVarP(&makeOptions.Name, "name", "n", "", "Name of file to generate")
+	cmd.Flags().StringVarP(&makeOptions.Target, "target", "t", "csv", "Where generated data should go")
 
 	return cmd
 }
@@ -78,29 +80,46 @@ func (opt *MakeOptions) Run() error {
 	makerClient := opt.datamkrClient.Maker()
 	storageClient := opt.datamkrClient.Storage()
 
-	filePath := fmt.Sprintf("./%s.csv", opt.Name)
-	err := storageClient.Init(filePath)
+	csvWriter, err := storageClient.GetStorageService(opt.Target)
 	if err != nil {
 		return err
 	}
+
+	var args storage.StorageArgs
+	args.FileName = fmt.Sprintf("%s.csv", opt.Name)
+	args.IsWriter = true
+
+	err = csvWriter.Init(args)
+	if err != nil {
+		return err
+	}
+	defer csvWriter.Close()
 
 	fieldKeys := make([]string, 0, len(opt.DatasetDefinition.Fields))
 	for fieldKey := range opt.DatasetDefinition.Fields {
 		fieldKeys = append(fieldKeys, fieldKey)
 	}
-	storageClient.Insert(filePath, fieldKeys)
+	err = csvWriter.Write(fieldKeys)
+	if err != nil {
+		return err
+	}
 
+	orderedRows := make([][]string, opt.NumberOfRows)
 	for i := 0; i < int(opt.NumberOfRows); i++ {
 		row, err := makerClient.MakeRow(opt.DatasetDefinition)
 		if err != nil {
 			return err
 		}
-		orderedRow := make([]string, 0)
-		for _, fieldKey := range fieldKeys {
+		orderedRow := make([]string, len(fieldKeys))
+		for j, fieldKey := range fieldKeys {
 			value := row[fieldKey]
-			orderedRow = append(orderedRow, value.(string))
+			orderedRow[j] = value.(string)
 		}
-		storageClient.Insert(filePath, orderedRow)
+		orderedRows[i] = orderedRow
+	}
+	err = csvWriter.WriteAll(orderedRows)
+	if err != nil {
+		return err
 	}
 
 	return nil

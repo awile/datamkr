@@ -19,7 +19,7 @@ type DatasetClient struct {
 	storageService *storage.LocalStorage
 }
 
-func NewWithConfig(config *config.DatamkrConfig) *DatasetClient {
+func NewWithConfig(config *config.DatamkrConfig) DatasetClientInterface {
 	var dc DatasetClient
 
 	dc.config = config

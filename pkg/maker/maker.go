@@ -13,7 +13,7 @@ type MakerClient struct {
 	config *config.DatamkrConfig
 }
 
-func NewWithConfig(config *config.DatamkrConfig) *MakerClient {
+func NewWithConfig(config *config.DatamkrConfig) MakerClientInterface {
 	var mc MakerClient
 
 	mc.config = config

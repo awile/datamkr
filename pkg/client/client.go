@@ -14,9 +14,9 @@ type Interface interface {
 }
 
 type Client struct {
-	datasets *dataset.DatasetClient
-	maker    *maker.MakerClient
-	storage  *storage.StorageClient
+	datasets dataset.DatasetClientInterface
+	maker    maker.MakerClientInterface
+	storage  storage.StorageClientInterface
 }
 
 func NewWithConfig(config *config.DatamkrConfig) *Client {
