@@ -3,6 +3,7 @@ package maker
 import (
 	"github.com/awile/datamkr/pkg/config"
 	"github.com/awile/datamkr/pkg/dataset"
+	"github.com/awile/datamkr/pkg/maker/providers"
 )
 
 type MakerClientInterface interface {
@@ -10,26 +11,41 @@ type MakerClientInterface interface {
 }
 
 type MakerClient struct {
-	config *config.DatamkrConfig
+	providers map[string]providers.FieldProviderInterface
+	config    *config.DatamkrConfig
 }
 
 func NewWithConfig(config *config.DatamkrConfig) MakerClientInterface {
 	var mc MakerClient
 
 	mc.config = config
+	mc.providers = make(map[string]providers.FieldProviderInterface)
 
 	return &mc
 }
 
 func (mc *MakerClient) MakeRow(definition dataset.DatasetDefinition) (map[string]interface{}, error) {
 	var err error
-	row := make(map[string]interface{})
+	row := make(map[string]interface{}, len(definition.Fields))
 	for key, fieldDefinition := range definition.Fields {
-		fieldMaker, err := NewFieldMaker(fieldDefinition)
+		fieldProvider, err := mc.getProvider(fieldDefinition)
 		if err != nil {
 			break
 		}
-		row[key] = fieldMaker.MakeField()
+		row[key] = fieldProvider.MakeField()
 	}
 	return row, err
+}
+
+func (mc *MakerClient) getProvider(fieldDefinition dataset.DatasetDefinitionField) (providers.FieldProviderInterface, error) {
+	provider := mc.providers[fieldDefinition.Type]
+	if provider != nil {
+		return provider, nil
+	}
+	provider, err := providers.NewFieldProvider(fieldDefinition)
+	if err != nil {
+		return nil, err
+	}
+	mc.providers[fieldDefinition.Type] = provider
+	return provider, nil
 }
