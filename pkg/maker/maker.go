@@ -1,6 +1,9 @@
 package maker
 
 import (
+	"math/rand"
+	"time"
+
 	"github.com/awile/datamkr/pkg/config"
 	"github.com/awile/datamkr/pkg/dataset"
 	"github.com/awile/datamkr/pkg/maker/providers"
@@ -16,6 +19,7 @@ type MakerClient struct {
 }
 
 func NewWithConfig(config *config.DatamkrConfig) MakerClientInterface {
+	rand.Seed(time.Now().UnixNano())
 	var mc MakerClient
 
 	mc.config = config

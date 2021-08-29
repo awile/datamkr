@@ -95,9 +95,11 @@ func (opt *MakeOptions) Run() error {
 	}
 	defer csvWriter.Close()
 
-	fieldKeys := make([]string, 0, len(opt.DatasetDefinition.Fields))
+	fieldKeys := make([]string, len(opt.DatasetDefinition.Fields))
+	var idx int = 0
 	for fieldKey := range opt.DatasetDefinition.Fields {
-		fieldKeys = append(fieldKeys, fieldKey)
+		fieldKeys[idx] = fieldKey
+		idx++
 	}
 	err = csvWriter.Write(fieldKeys)
 	if err != nil {

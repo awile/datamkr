@@ -18,6 +18,10 @@ func NewFieldProvider(fieldDefinition dataset.DatasetDefinitionField) (FieldProv
 		return NewStringWithDefinition(fieldDefinition), nil
 	case "name":
 		return NewNameWithDefinition(fieldDefinition), nil
+	case "email":
+		return NewEmailWithDefinition(fieldDefinition), nil
+	case "boolean":
+		return NewBooleanWithDefinition(fieldDefinition), nil
 	default:
 		return nil, fmt.Errorf("Field type %s does not exist", fieldDefinition.Type)
 	}

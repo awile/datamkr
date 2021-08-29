@@ -2,7 +2,6 @@ package providers
 
 import (
 	"math/rand"
-	"time"
 
 	"github.com/awile/datamkr/pkg/dataset"
 )
@@ -16,13 +15,10 @@ func NewNameWithDefinition(definition dataset.DatasetDefinitionField) FieldProvi
 }
 
 func (nfm *nameFieldMaker) MakeField() interface{} {
-	const NUMBER_OF_NAMES = 50
-	rand.Seed(time.Now().UnixNano())
-	i := rand.Intn(NUMBER_OF_NAMES)
-	return nfm.getName(i)
+	return nfm.getName()
 }
 
-func (nfm *nameFieldMaker) getName(index int) string {
+func (nfm *nameFieldMaker) getName() string {
 	var names []string = []string{
 		"Mason Wyman",
 		"Adria Marcinek",
@@ -76,5 +72,5 @@ func (nfm *nameFieldMaker) getName(index int) string {
 		"Roseann Caryl",
 		"Chad Blais",
 	}
-	return names[index]
+	return names[rand.Intn(len(names))]
 }
