@@ -8,7 +8,6 @@ import (
 	"github.com/awile/datamkr/pkg/client"
 	"github.com/awile/datamkr/pkg/config"
 	"github.com/awile/datamkr/pkg/dataset"
-	"github.com/awile/datamkr/pkg/storage"
 	"github.com/spf13/cobra"
 )
 
@@ -80,48 +79,26 @@ func (opt *MakeOptions) Run() error {
 	makerClient := opt.datamkrClient.Maker()
 	storageClient := opt.datamkrClient.Storage()
 
-	csvWriter, err := storageClient.GetStorageService(opt.Target)
+	storageWriter := storageClient.GetStorageService(opt.Target, opt)
+	if storageWriter == nil {
+		return fmt.Errorf("%s is not a valid storage service", opt.Target)
+	}
+
+	err := storageWriter.Init()
 	if err != nil {
 		return err
 	}
+	defer storageWriter.Close()
 
-	var args storage.StorageArgs
-	args.FileName = fmt.Sprintf("%s.csv", opt.Name)
-	args.IsWriter = true
-
-	err = csvWriter.Init(args)
-	if err != nil {
-		return err
-	}
-	defer csvWriter.Close()
-
-	fieldKeys := make([]string, len(opt.DatasetDefinition.Fields))
-	var idx int = 0
-	for fieldKey := range opt.DatasetDefinition.Fields {
-		fieldKeys[idx] = fieldKey
-		idx++
-	}
-	err = csvWriter.Write(fieldKeys)
-	if err != nil {
-		return err
-	}
-
-	orderedRows := make([][]string, opt.NumberOfRows)
 	for i := 0; i < int(opt.NumberOfRows); i++ {
 		row, err := makerClient.MakeRow(opt.DatasetDefinition)
 		if err != nil {
 			return err
 		}
-		orderedRow := make([]string, len(fieldKeys))
-		for j, fieldKey := range fieldKeys {
-			value := row[fieldKey]
-			orderedRow[j] = value.(string)
+		err = storageWriter.Write(row)
+		if err != nil {
+			return err
 		}
-		orderedRows[i] = orderedRow
-	}
-	err = csvWriter.WriteAll(orderedRows)
-	if err != nil {
-		return err
 	}
 
 	return nil

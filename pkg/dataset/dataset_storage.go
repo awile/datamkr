@@ -1,4 +1,4 @@
-package storage
+package dataset
 
 import (
 	"io"
@@ -8,6 +8,14 @@ import (
 
 	"github.com/awile/datamkr/pkg/config"
 )
+
+type LocalStorageInterface interface {
+	Exists(filepath string) (bool, error)
+	List() ([]string, error)
+	Write(filePath string, data []byte) error
+	Read(filePath string) ([]byte, error)
+	Create(filePath string) error
+}
 
 type LocalStorage struct {
 	fileDirectory string

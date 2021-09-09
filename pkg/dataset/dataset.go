@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/awile/datamkr/pkg/config"
-	"github.com/awile/datamkr/pkg/storage"
 	"github.com/go-yaml/yaml"
 )
 
@@ -16,14 +15,14 @@ type DatasetClientInterface interface {
 
 type DatasetClient struct {
 	config         *config.DatamkrConfig
-	storageService *storage.LocalStorage
+	storageService LocalStorageInterface
 }
 
 func NewWithConfig(config *config.DatamkrConfig) DatasetClientInterface {
 	var dc DatasetClient
 
 	dc.config = config
-	dc.storageService = storage.NewLocalStorage(config)
+	dc.storageService = NewLocalStorage(config)
 
 	return &dc
 }

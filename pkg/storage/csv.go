@@ -10,67 +10,87 @@ import (
 )
 
 type csvStorageService struct {
-	filePath string
-	writer   *csv.Writer
+	FilePath   string
+	HeaderKeys []string
+	Writer     *csv.Writer
 
 	fileHandler *os.File
 
-	config *config.DatamkrConfig
+	fileName string
+	config   *config.DatamkrConfig
 }
 
 type CsvStorageArgs struct {
-	FileName string
-	IsWriter bool
+	Name       string
+	HeaderKeys []string
 }
 
-func newCsvStorageWithConfig(config *config.DatamkrConfig) StorageServiceInterface {
+func newCsvStorageWriter(config *config.DatamkrConfig, args CsvStorageArgs) StorageServiceInterface {
 	var storageService csvStorageService
 
 	storageService.config = config
+	storageService.fileName = args.Name
+
+	if args.HeaderKeys != nil {
+		storageService.HeaderKeys = args.HeaderKeys
+	}
 
 	return &storageService
 }
 
-func (css *csvStorageService) Init(args interface{}) error {
-	var csvArgs StorageArgs = args.(StorageArgs)
-
-	if csvArgs.FileName == "" {
+func (css *csvStorageService) Init() error {
+	if css.fileName == "" {
 		return fmt.Errorf("Must provide csv storage service with a FileName\n")
 	}
-	css.filePath = fmt.Sprintf("./%s", csvArgs.FileName)
+	css.FilePath = fmt.Sprintf("./%s", css.fileName)
 
-	if csvArgs.IsWriter {
-		fileWriter, err := css.getWriter()
-		if err != nil {
-			return err
-		}
-		css.writer = csv.NewWriter(fileWriter)
+	fileWriter, err := css.getWriter()
+	if err != nil {
+		return err
+	}
+	css.Writer = csv.NewWriter(fileWriter)
+
+	err = css.Writer.Write(css.HeaderKeys)
+	if err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func (css *csvStorageService) Write(data interface{}) error {
-	if css.writer == nil {
+func (css *csvStorageService) Write(data map[string]interface{}) error {
+	if css.Writer == nil {
 		return fmt.Errorf("Must init csv writer first: csvStorageService.Init()\n")
 	}
-	var record []string = data.([]string)
-	return css.writer.Write(record)
+	record := make([]string, len(css.HeaderKeys))
+	for i, headerKey := range css.HeaderKeys {
+		value := data[headerKey]
+		record[i] = value.(string)
+	}
+	return css.Writer.Write(record)
 }
 
-func (css *csvStorageService) WriteAll(data interface{}) error {
-	if css.writer == nil {
+func (css *csvStorageService) WriteAll(data []map[string]interface{}) error {
+	if css.Writer == nil {
 		return fmt.Errorf("Must init csv writer first: csvStorageService.Init()\n")
 	}
-	var record [][]string = data.([][]string)
-	return css.writer.WriteAll(record)
+	records := make([][]string, len(data))
+	for i, row := range data {
+		record := make([]string, len(css.HeaderKeys))
+		for j, headerKey := range css.HeaderKeys {
+			value := row[headerKey]
+			record[j] = value.(string)
+		}
+		records[i] = record
+	}
+	return css.Writer.WriteAll(records)
 }
 
 func (css *csvStorageService) Close() error {
-	if css.writer == nil {
+	if css.Writer == nil {
 		return fmt.Errorf("No csv writer found")
 	}
-	css.writer.Flush()
+	css.Writer.Flush()
 
 	if css.fileHandler == nil {
 		return fmt.Errorf("No file found")
@@ -79,7 +99,7 @@ func (css *csvStorageService) Close() error {
 }
 
 func (css *csvStorageService) getWriter() (io.Writer, error) {
-	f, err := os.OpenFile(css.filePath, os.O_RDWR|os.O_CREATE, 0644)
+	f, err := os.OpenFile(css.FilePath, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		return nil, err
 	}
