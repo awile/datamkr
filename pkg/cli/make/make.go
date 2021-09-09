@@ -8,6 +8,7 @@ import (
 	"github.com/awile/datamkr/pkg/client"
 	"github.com/awile/datamkr/pkg/config"
 	"github.com/awile/datamkr/pkg/dataset"
+	"github.com/awile/datamkr/pkg/storage"
 	"github.com/spf13/cobra"
 )
 
@@ -79,7 +80,13 @@ func (opt *MakeOptions) Run() error {
 	makerClient := opt.datamkrClient.Maker()
 	storageClient := opt.datamkrClient.Storage()
 
-	storageWriter := storageClient.GetStorageService(opt.Target, opt)
+	writerOptions := storage.CreateWriterOptions()
+	if opt.Target == "csv" {
+		writerOptions.Id = opt.Name
+		writerOptions.DatasetDefinition = opt.DatasetDefinition
+	}
+
+	storageWriter := storageClient.GetStorageWriterService(opt.Target, writerOptions)
 	if storageWriter == nil {
 		return fmt.Errorf("%s is not a valid storage service", opt.Target)
 	}

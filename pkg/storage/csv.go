@@ -20,19 +20,22 @@ type csvStorageService struct {
 	config   *config.DatamkrConfig
 }
 
-type CsvStorageArgs struct {
-	Name       string
-	HeaderKeys []string
-}
-
-func newCsvStorageWriter(config *config.DatamkrConfig, args CsvStorageArgs) StorageServiceInterface {
+func newCsvStorageWriter(config *config.DatamkrConfig, opts WriterOptions) StorageServiceInterface {
 	var storageService csvStorageService
 
 	storageService.config = config
-	storageService.fileName = args.Name
+	storageService.fileName = opts.Id
 
-	if args.HeaderKeys != nil {
-		storageService.HeaderKeys = args.HeaderKeys
+	if opts.FieldKeys != nil {
+		storageService.HeaderKeys = opts.FieldKeys
+	} else {
+		headerKeys := make([]string, len(opts.DatasetDefinition.Fields))
+		var i int = 0
+		for fieldKey := range opts.DatasetDefinition.Fields {
+			headerKeys[i] = fieldKey
+			i++
+		}
+		storageService.HeaderKeys = headerKeys
 	}
 
 	return &storageService

@@ -5,7 +5,7 @@ import (
 )
 
 type StorageClientInterface interface {
-	GetStorageService(storageType string, args interface{}) StorageServiceInterface
+	GetStorageWriterService(storageType string, opts WriterOptions) StorageServiceInterface
 }
 
 type StorageServiceInterface interface {
@@ -27,14 +27,10 @@ func NewWithConfig(config *config.DatamkrConfig) StorageClientInterface {
 	return &sc
 }
 
-func (sc *storageClient) GetStorageService(storageType string, args interface{}) StorageServiceInterface {
+func (sc *storageClient) GetStorageWriterService(storageType string, opts WriterOptions) StorageServiceInterface {
 	switch storageType {
 	case "csv":
-		var csvStorageArgs = args.(CsvStorageArgs)
-		return newCsvStorageWriter(sc.config, csvStorageArgs)
-	case "local":
-		var csvStorageArgs = args.(CsvStorageArgs)
-		return newCsvStorageWriter(sc.config, csvStorageArgs)
+		return newCsvStorageWriter(sc.config, opts)
 	default:
 		return nil
 	}
