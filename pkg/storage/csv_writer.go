@@ -9,7 +9,7 @@ import (
 	"github.com/awile/datamkr/pkg/config"
 )
 
-type csvStorageService struct {
+type csvStorageServiceWriter struct {
 	FilePath   string
 	HeaderKeys []string
 	Writer     *csv.Writer
@@ -20,8 +20,8 @@ type csvStorageService struct {
 	config   *config.DatamkrConfig
 }
 
-func newCsvStorageWriter(config *config.DatamkrConfig, opts WriterOptions) StorageServiceInterface {
-	var storageService csvStorageService
+func newCsvStorageWriter(config *config.DatamkrConfig, opts WriterOptions) StorageServiceWriterInterface {
+	var storageService csvStorageServiceWriter
 
 	storageService.config = config
 	storageService.fileName = opts.Id
@@ -41,7 +41,7 @@ func newCsvStorageWriter(config *config.DatamkrConfig, opts WriterOptions) Stora
 	return &storageService
 }
 
-func (css *csvStorageService) Init() error {
+func (css *csvStorageServiceWriter) Init() error {
 	if css.fileName == "" {
 		return fmt.Errorf("Must provide csv storage service with a FileName\n")
 	}
@@ -61,7 +61,7 @@ func (css *csvStorageService) Init() error {
 	return nil
 }
 
-func (css *csvStorageService) Write(data map[string]interface{}) error {
+func (css *csvStorageServiceWriter) Write(data map[string]interface{}) error {
 	if css.Writer == nil {
 		return fmt.Errorf("Must init csv writer first: csvStorageService.Init()\n")
 	}
@@ -73,7 +73,7 @@ func (css *csvStorageService) Write(data map[string]interface{}) error {
 	return css.Writer.Write(record)
 }
 
-func (css *csvStorageService) WriteAll(data []map[string]interface{}) error {
+func (css *csvStorageServiceWriter) WriteAll(data []map[string]interface{}) error {
 	if css.Writer == nil {
 		return fmt.Errorf("Must init csv writer first: csvStorageService.Init()\n")
 	}
@@ -89,7 +89,7 @@ func (css *csvStorageService) WriteAll(data []map[string]interface{}) error {
 	return css.Writer.WriteAll(records)
 }
 
-func (css *csvStorageService) Close() error {
+func (css *csvStorageServiceWriter) Close() error {
 	if css.Writer == nil {
 		return fmt.Errorf("No csv writer found")
 	}
@@ -101,7 +101,7 @@ func (css *csvStorageService) Close() error {
 	return css.fileHandler.Close()
 }
 
-func (css *csvStorageService) getWriter() (io.Writer, error) {
+func (css *csvStorageServiceWriter) getWriter() (io.Writer, error) {
 	f, err := os.OpenFile(css.FilePath, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		return nil, err

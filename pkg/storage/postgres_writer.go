@@ -10,7 +10,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type postgresStorageService struct {
+type postgresStorageServiceWriter struct {
 	ConnectionString string
 	Columns          []string
 	Table            string
@@ -19,8 +19,8 @@ type postgresStorageService struct {
 	ctx context.Context
 }
 
-func newPostgresStorageWriter(config *config.DatamkrConfig, opts WriterOptions) StorageServiceInterface {
-	var storageService postgresStorageService
+func newPostgresStorageWriter(config *config.DatamkrConfig, opts WriterOptions) StorageServiceWriterInterface {
+	var storageService postgresStorageServiceWriter
 
 	storageService.ConnectionString = opts.Id
 	storageService.Table = opts.SecondaryId
@@ -28,7 +28,7 @@ func newPostgresStorageWriter(config *config.DatamkrConfig, opts WriterOptions) 
 	return &storageService
 }
 
-func (pss *postgresStorageService) Init() error {
+func (pss *postgresStorageServiceWriter) Init() error {
 	db, err := sql.Open("postgres", pss.ConnectionString)
 	if err != nil {
 		return err
@@ -56,7 +56,7 @@ func (pss *postgresStorageService) Init() error {
 	return nil
 }
 
-func (pss *postgresStorageService) Write(data map[string]interface{}) error {
+func (pss *postgresStorageServiceWriter) Write(data map[string]interface{}) error {
 	values := make([]string, len(data))
 	for i, column := range pss.Columns {
 		values[i] = fmt.Sprintf("'%s'", data[column].(string))
@@ -75,7 +75,7 @@ func (pss *postgresStorageService) Write(data map[string]interface{}) error {
 	return nil
 }
 
-func (pss *postgresStorageService) WriteAll(data []map[string]interface{}) error {
+func (pss *postgresStorageServiceWriter) WriteAll(data []map[string]interface{}) error {
 	tx, err := pss.db.BeginTx(pss.ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
 	if err != nil {
 		return err
@@ -105,6 +105,6 @@ func (pss *postgresStorageService) WriteAll(data []map[string]interface{}) error
 	return tx.Commit()
 }
 
-func (pss *postgresStorageService) Close() error {
+func (pss *postgresStorageServiceWriter) Close() error {
 	return pss.db.Close()
 }
