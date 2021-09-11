@@ -1,4 +1,4 @@
-package dataset
+package list
 
 import (
 	"fmt"
@@ -14,12 +14,12 @@ type DatasetListOptions struct {
 	datamkrClient client.Interface
 }
 
-func NewDatasetListOptions(factory *config.DatamkrConfigFactory) *DatasetListOptions {
+func NewListOptions(factory *config.DatamkrConfigFactory) *DatasetListOptions {
 	return &DatasetListOptions{factory: factory}
 }
 
-func NewDatasetListCmd(configFactory *config.DatamkrConfigFactory) *cobra.Command {
-	datasetListOptions := NewDatasetListOptions(configFactory)
+func NewListCmd(configFactory *config.DatamkrConfigFactory) *cobra.Command {
+	datasetListOptions := NewListOptions(configFactory)
 
 	cmd := &cobra.Command{
 		Use:     "list",

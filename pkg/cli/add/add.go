@@ -1,4 +1,4 @@
-package dataset
+package add
 
 import (
 	"errors"
@@ -25,18 +25,18 @@ type DatasetAddOptions struct {
 	datamkrClient client.Interface
 }
 
-func NewDatasetAddOptions(factory *config.DatamkrConfigFactory) *DatasetAddOptions {
+func NewAddOptions(factory *config.DatamkrConfigFactory) *DatasetAddOptions {
 	return &DatasetAddOptions{factory: factory}
 }
 
-func NewDatasetAddCmd(configFactory *config.DatamkrConfigFactory) *cobra.Command {
-	datasetAddOptions := NewDatasetAddOptions(configFactory)
+func NewAddCmd(configFactory *config.DatamkrConfigFactory) *cobra.Command {
+	datasetAddOptions := NewAddOptions(configFactory)
 
 	cmd := &cobra.Command{
 		Use:     "add",
 		Short:   "Add a new dataset definition",
 		Long:    "Add a new dataset definition.",
-		Example: "datamkr dataset add <dataset_name>",
+		Example: "datamkr add <dataset_name>",
 		Run: func(cmd *cobra.Command, args []string) {
 			utils.CheckErr(datasetAddOptions.Complete(cmd, args))
 			utils.CheckErr(datasetAddOptions.Validate())
@@ -57,7 +57,7 @@ func NewDatasetAddCmd(configFactory *config.DatamkrConfigFactory) *cobra.Command
 
 func (opt *DatasetAddOptions) Complete(cmd *cobra.Command, args []string) error {
 	if len(args) == 0 {
-		return errors.New("Must give dataset a name:\n\n    datamkr dataset add <dataset_name>\n\n")
+		return errors.New("Must give dataset a name:\n\n    datamkr add <dataset_name>\n\n")
 	} else {
 		opt.DatasetName = args[0]
 	}
@@ -83,7 +83,7 @@ func (opt *DatasetAddOptions) Complete(cmd *cobra.Command, args []string) error 
 
 func (opt *DatasetAddOptions) Validate() error {
 	if opt.DatasetName == "" {
-		return errors.New("Must give dataset a name:\n\n    datamkr dataset add <dataset_name>\n\n")
+		return errors.New("Must give dataset a name:\n\n    datamkr add <dataset_name>\n\n")
 	}
 	if opt.storageType == "postgres" && opt.Table == "" {
 		return fmt.Errorf("Must provide which postgres table to use: --table <table_name>\n")
