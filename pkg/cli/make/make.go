@@ -20,6 +20,9 @@ type MakeOptions struct {
 	NumberOfRows      int32
 	Fields            string
 
+	// postgres
+	Table string
+
 	factory       config.ConfigFactory
 	datamkrClient client.Interface
 }
@@ -46,6 +49,7 @@ func NewMakeCmd(configFactory *config.DatamkrConfigFactory) *cobra.Command {
 	cmd.Flags().Int32VarP(&makeOptions.NumberOfRows, "num", "n", 10, "Number of rows to generate")
 	cmd.Flags().StringVarP(&makeOptions.Target, "to", "t", "", "Where generated data should go")
 	cmd.Flags().StringVarP(&makeOptions.Fields, "fields", "f", "", "Fields to include (--fields a,b,c)")
+	cmd.Flags().StringVar(&makeOptions.Table, "table", "", "DB table to use (only valid for: --to <db_connection_string>)")
 
 	return cmd
 }
@@ -81,6 +85,9 @@ func (opt *MakeOptions) Complete(cmd *cobra.Command, args []string) error {
 }
 
 func (opt *MakeOptions) Validate() error {
+	if opt.Type == "postgres" && opt.Table == "" {
+		return fmt.Errorf("Must provide which postgres table to load data: --table <table_name>\n")
+	}
 	return nil
 }
 
@@ -91,6 +98,9 @@ func (opt *MakeOptions) Run() error {
 	writerOptions := storage.CreateWriterOptions()
 	writerOptions.DatasetDefinition = opt.DatasetDefinition
 	writerOptions.Id = opt.Target
+	if opt.Type == "postgres" {
+		writerOptions.SecondaryId = opt.Table
+	}
 
 	storageWriter := storageClient.GetStorageWriterService(opt.Type, writerOptions)
 	if storageWriter == nil {

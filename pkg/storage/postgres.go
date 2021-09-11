@@ -23,7 +23,7 @@ func newPostgresStorageWriter(config *config.DatamkrConfig, opts WriterOptions) 
 	var storageService postgresStorageService
 
 	storageService.ConnectionString = opts.Id
-	storageService.Table = "users"
+	storageService.Table = opts.SecondaryId
 
 	return &storageService
 }

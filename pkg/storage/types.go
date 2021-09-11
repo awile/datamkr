@@ -6,6 +6,7 @@ import (
 
 type WriterOptions struct {
 	Id                string
+	SecondaryId       string
 	FieldKeys         []string
 	DatasetDefinition dataset.DatasetDefinition
 }
