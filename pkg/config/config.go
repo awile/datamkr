@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -9,16 +10,23 @@ import (
 	"github.com/spf13/viper"
 )
 
-type DatamkrConfig struct {
-	DatasetsDir string `yaml:"datasetsDir"`
-}
-
 func NewConfig() *DatamkrConfig {
 	var config DatamkrConfig
 
 	settings := viper.GetStringMap("datamkr")
+	fmt.Println(settings["storage"])
 
 	config.DatasetsDir = settings["datasetsdir"].(string)
+
+	storageAliases := make(map[string]StorageAlias)
+	configStorageMap := settings["storage"].(map[string]interface{})
+	for storageName := range configStorageMap {
+		var storageAlias StorageAlias
+		storageMap := configStorageMap[storageName].(map[string]interface{})
+		storageAlias.ConnectionString = storageMap["connection"].(string)
+		storageAliases[storageName] = storageAlias
+	}
+	config.StorageAliases = storageAliases
 
 	return &config
 }
