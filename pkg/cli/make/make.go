@@ -102,7 +102,7 @@ func (opt *MakeOptions) Run() error {
 		writerOptions.SecondaryId = opt.Table
 	}
 
-	storageWriter := storageClient.GetStorageWriterService(opt.Type, writerOptions)
+	storageWriter := storageClient.GetStorageServiceWriter(opt.Type, writerOptions)
 	if storageWriter == nil {
 		return fmt.Errorf("%s is not a valid target\n", opt.Type)
 	}

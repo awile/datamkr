@@ -2,21 +2,25 @@ package dataset
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	utils "github.com/awile/datamkr/pkg/cli/util"
 	"github.com/awile/datamkr/pkg/client"
 	"github.com/awile/datamkr/pkg/config"
 	"github.com/awile/datamkr/pkg/dataset"
+	"github.com/awile/datamkr/pkg/storage"
 	"github.com/spf13/cobra"
 )
 
 type DatasetAddOptions struct {
 	DatasetName string
 	Definition  dataset.DatasetDefinition
+	Fieldslist  []string
+	From        string
+	Table       string
 
-	Fieldslist []string
-
+	storageType   string
 	factory       config.ConfigFactory
 	datamkrClient client.Interface
 }
@@ -46,6 +50,8 @@ func NewDatasetAddCmd(configFactory *config.DatamkrConfigFactory) *cobra.Command
 		datasetAddOptions.Fieldslist,
 		"Define definition fields (e.g. --field name=id,key2=uuid --field name=email,type=email)",
 	)
+	cmd.Flags().StringVar(&datasetAddOptions.From, "from", "", "database to import dataset definition from")
+	cmd.Flags().StringVarP(&datasetAddOptions.Table, "table", "t", "", "DB table to use (only valid for: --from <db_connection_string>)")
 	return cmd
 }
 
@@ -57,12 +63,14 @@ func (opt *DatasetAddOptions) Complete(cmd *cobra.Command, args []string) error 
 	}
 
 	var datasetDefinition dataset.DatasetDefinition
-
 	if len(opt.Fieldslist) > 0 {
 		datasetDefinition.Fields = parseDatasetDefinitionFields(opt.Fieldslist)
 	}
-
 	opt.Definition = datasetDefinition
+
+	if strings.Contains(opt.From, "postgresql://") {
+		opt.storageType = "postgres"
+	}
 
 	currentConfig, err := opt.factory.GetConfig()
 	if err != nil {
@@ -77,12 +85,47 @@ func (opt *DatasetAddOptions) Validate() error {
 	if opt.DatasetName == "" {
 		return errors.New("Must give dataset a name:\n\n    datamkr dataset add <dataset_name>\n\n")
 	}
+	if opt.storageType == "postgres" && opt.Table == "" {
+		return fmt.Errorf("Must provide which postgres table to use: --table <table_name>\n")
+	}
 	return nil
 }
 
 func (opt *DatasetAddOptions) Run() error {
 	datasetClient := opt.datamkrClient.Datasets()
-	return datasetClient.Add(opt.DatasetName, opt.Definition)
+
+	if opt.storageType != "" {
+		storageClient := opt.datamkrClient.Storage()
+		readerOptions := storage.CreateReaderOptions()
+		if opt.storageType == "postgres" {
+			readerOptions.Id = opt.From
+			readerOptions.SecondaryId = opt.Table
+		}
+
+		storageReader := storageClient.GetStorageServiceReader(opt.storageType, readerOptions)
+		if storageReader == nil {
+			return fmt.Errorf("%s is not a valid target\n", opt.storageType)
+		}
+
+		err := storageReader.Init()
+		if err != nil {
+			return err
+		}
+		defer storageReader.Close()
+
+		datasetDefinition, err := storageReader.GetDatasetDefinition()
+		if err != nil {
+			return err
+		}
+		opt.Definition = datasetDefinition
+	}
+
+	err := datasetClient.Add(opt.DatasetName, opt.Definition)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Dataset %s created\n", opt.DatasetName)
+	return nil
 }
 
 func parseDatasetDefinitionFields(fields []string) map[string]dataset.DatasetDefinitionField {

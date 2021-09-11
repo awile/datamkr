@@ -5,14 +5,8 @@ import (
 )
 
 type StorageClientInterface interface {
-	GetStorageWriterService(storageType string, opts WriterOptions) StorageServiceWriterInterface
-}
-
-type StorageServiceWriterInterface interface {
-	Init() error
-	Write(data map[string]interface{}) error
-	WriteAll(data []map[string]interface{}) error
-	Close() error
+	GetStorageServiceWriter(storageType string, opts WriterOptions) StorageServiceWriterInterface
+	GetStorageServiceReader(storageType string, opts ReaderOptions) StorageServiceReaderInterface
 }
 
 type storageClient struct {
@@ -27,12 +21,21 @@ func NewWithConfig(config *config.DatamkrConfig) StorageClientInterface {
 	return &sc
 }
 
-func (sc *storageClient) GetStorageWriterService(storageType string, opts WriterOptions) StorageServiceWriterInterface {
+func (sc *storageClient) GetStorageServiceWriter(storageType string, opts WriterOptions) StorageServiceWriterInterface {
 	switch storageType {
 	case "csv":
 		return newCsvStorageWriter(sc.config, opts)
 	case "postgres":
 		return newPostgresStorageWriter(sc.config, opts)
+	default:
+		return nil
+	}
+}
+
+func (sc *storageClient) GetStorageServiceReader(storageType string, opts ReaderOptions) StorageServiceReaderInterface {
+	switch storageType {
+	case "postgres":
+		return newPostgresStorageReader(sc.config, opts)
 	default:
 		return nil
 	}
