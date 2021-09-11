@@ -5,23 +5,17 @@ type DatamkrConfig struct {
 	StorageAliases map[string]StorageAlias `yaml:"storage,omitempty"`
 }
 
-func (d *DatamkrConfig) GetStorageAlias(alias string) string {
+func (d *DatamkrConfig) GetStorageAlias(alias string) (StorageAlias, bool) {
+	var storageAlias StorageAlias
 	if len(d.StorageAliases) > 0 {
 		storageAlias, found := d.StorageAliases[alias]
-		if found {
-			return storageAlias.Value()
-		}
+		return storageAlias, found
 	}
-	return ""
+	return storageAlias, false
 }
 
 type StorageAlias struct {
 	ConnectionString string `yaml:"connection,omitempty"`
-}
-
-func (sa *StorageAlias) Value() string {
-	if sa.ConnectionString != "" {
-		return sa.ConnectionString
-	}
-	return ""
+	Table            string `yaml:"table,omitempty"`
+	Type             string `yaml:"type"`
 }

@@ -68,9 +68,12 @@ func (opt *DatasetAddOptions) Complete(cmd *cobra.Command, args []string) error 
 		opt.DatasetName = args[0]
 	}
 
-	storageAlias := currentConfig.GetStorageAlias(opt.From)
-	if storageAlias != "" {
-		opt.From = storageAlias
+	storageAlias, aliasExists := currentConfig.GetStorageAlias(opt.From)
+	if aliasExists {
+		if storageAlias.Type == "postgres" {
+			opt.From = storageAlias.ConnectionString
+			opt.Table = storageAlias.Table
+		}
 	}
 
 	var datasetDefinition dataset.DatasetDefinition

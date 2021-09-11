@@ -22,6 +22,8 @@ func NewConfig() *DatamkrConfig {
 		var storageAlias StorageAlias
 		storageMap := configStorageMap[storageName].(map[string]interface{})
 		storageAlias.ConnectionString = storageMap["connection"].(string)
+		storageAlias.Table = storageMap["table"].(string)
+		storageAlias.Type = storageMap["type"].(string)
 		storageAliases[storageName] = storageAlias
 	}
 	config.StorageAliases = storageAliases
