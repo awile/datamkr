@@ -57,6 +57,11 @@ func (opt *DatasetListOptions) Run() error {
 		return err
 	}
 
+	if len(datasets) == 0 {
+		fmt.Print("No datasets found, to add a dataset (example):\n\n   datamkr dataset add users --field name=id,type=uuid --field name=email,type=email\n\n")
+		return nil
+	}
+
 	for _, d := range datasets {
 		fmt.Println((d))
 	}

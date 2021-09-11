@@ -67,7 +67,6 @@ func (pss *postgresStorageService) Write(data map[string]interface{}) error {
 		strings.Join(pss.Columns, ","),
 		strings.Join(values, ","),
 	)
-	fmt.Println(insert_query)
 
 	_, err := pss.db.Exec(insert_query)
 	if err != nil {

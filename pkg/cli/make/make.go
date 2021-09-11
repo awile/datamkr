@@ -17,7 +17,6 @@ type MakeOptions struct {
 	DatasetDefinition dataset.DatasetDefinition
 	Target            string
 	Type              string
-	Name              string
 	NumberOfRows      int32
 	Fields            string
 
@@ -36,7 +35,7 @@ func NewMakeCmd(configFactory *config.DatamkrConfigFactory) *cobra.Command {
 		Use:     "make",
 		Short:   "Generate a dataset based on given definition",
 		Long:    "Generate dataset based on given definition",
-		Example: "datamkr make <dataset_name>",
+		Example: "  datamkr make <dataset_name>",
 		Run: func(cmd *cobra.Command, args []string) {
 			utils.CheckErr(makeOptions.Complete(cmd, args))
 			utils.CheckErr(makeOptions.Validate())
@@ -44,9 +43,8 @@ func NewMakeCmd(configFactory *config.DatamkrConfigFactory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Int32VarP(&makeOptions.NumberOfRows, "rows", "r", 10, "Number of rows to generate")
-	cmd.Flags().StringVarP(&makeOptions.Name, "name", "n", "", "Name of file to generate")
-	cmd.Flags().StringVarP(&makeOptions.Target, "target", "t", "csv", "Where generated data should go")
+	cmd.Flags().Int32VarP(&makeOptions.NumberOfRows, "num", "n", 10, "Number of rows to generate")
+	cmd.Flags().StringVarP(&makeOptions.Target, "to", "t", "", "Where generated data should go")
 	cmd.Flags().StringVarP(&makeOptions.Fields, "fields", "f", "", "Fields to include (--fields a,b,c)")
 
 	return cmd
@@ -61,21 +59,16 @@ func (opt *MakeOptions) Complete(cmd *cobra.Command, args []string) error {
 	datasetClient := opt.datamkrClient.Datasets()
 
 	if len(args) == 0 {
-		return errors.New("Must give dataset a name:\n\n    datamkr make <dataset_name>\n\n")
+		return errors.New("Must give which dataset to use:\n\n    datamkr make <dataset_name>\n\nTo check datasets use command: datamkr dataset list\n")
 	}
 
-	if opt.Target == "csv" {
-		opt.Type = "csv"
-	} else if strings.Contains(opt.Target, "postgresql://") {
+	if strings.Contains(opt.Target, "postgresql://") {
 		opt.Type = "postgres"
-	}
-
-	if opt.Name == "" {
-		if opt.Type == "csv" {
-			opt.Name = fmt.Sprintf("%s.csv", args[0])
-		} else {
-			opt.Name = args[0]
-		}
+	} else if len(opt.Target) > 4 && opt.Target[len(opt.Target)-4:] == ".csv" {
+		opt.Type = "csv"
+	} else {
+		opt.Target = fmt.Sprintf("%s.csv", args[0])
+		opt.Type = "csv"
 	}
 
 	datasetDefinition, err := datasetClient.Get(args[0])
@@ -97,15 +90,11 @@ func (opt *MakeOptions) Run() error {
 
 	writerOptions := storage.CreateWriterOptions()
 	writerOptions.DatasetDefinition = opt.DatasetDefinition
-	if opt.Target == "csv" {
-		writerOptions.Id = opt.Name
-	} else if strings.Contains(opt.Target, "postgresql://") {
-		writerOptions.Id = opt.Target
-	}
+	writerOptions.Id = opt.Target
 
 	storageWriter := storageClient.GetStorageWriterService(opt.Type, writerOptions)
 	if storageWriter == nil {
-		return fmt.Errorf("%s is not a valid target\n", opt.Target)
+		return fmt.Errorf("%s is not a valid target\n", opt.Type)
 	}
 
 	err := storageWriter.Init()
@@ -125,5 +114,6 @@ func (opt *MakeOptions) Run() error {
 		}
 	}
 
+	fmt.Printf("Created %d rows in %s\n", opt.NumberOfRows, opt.Target)
 	return nil
 }
