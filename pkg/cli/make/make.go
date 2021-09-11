@@ -66,6 +66,11 @@ func (opt *MakeOptions) Complete(cmd *cobra.Command, args []string) error {
 		return errors.New("Must give which dataset to use:\n\n    datamkr make <dataset_name>\n\nTo check datasets use command: datamkr dataset list\n")
 	}
 
+	storageAlias := currentConfig.GetStorageAlias(opt.Target)
+	if storageAlias != "" {
+		opt.Target = storageAlias
+	}
+
 	if strings.Contains(opt.Target, "postgresql://") {
 		opt.Type = "postgres"
 	} else if len(opt.Target) > 4 && opt.Target[len(opt.Target)-4:] == ".csv" {

@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -14,7 +13,6 @@ func NewConfig() *DatamkrConfig {
 	var config DatamkrConfig
 
 	settings := viper.GetStringMap("datamkr")
-	fmt.Println(settings["storage"])
 
 	config.DatasetsDir = settings["datasetsdir"].(string)
 

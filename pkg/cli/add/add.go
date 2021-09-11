@@ -56,10 +56,21 @@ func NewAddCmd(configFactory *config.DatamkrConfigFactory) *cobra.Command {
 }
 
 func (opt *DatasetAddOptions) Complete(cmd *cobra.Command, args []string) error {
+	currentConfig, err := opt.factory.GetConfig()
+	if err != nil {
+		return err
+	}
+	opt.datamkrClient = client.NewWithConfig(currentConfig)
+
 	if len(args) == 0 {
 		return errors.New("Must give dataset a name:\n\n    datamkr add <dataset_name>\n\n")
 	} else {
 		opt.DatasetName = args[0]
+	}
+
+	storageAlias := currentConfig.GetStorageAlias(opt.From)
+	if storageAlias != "" {
+		opt.From = storageAlias
 	}
 
 	var datasetDefinition dataset.DatasetDefinition
@@ -71,13 +82,6 @@ func (opt *DatasetAddOptions) Complete(cmd *cobra.Command, args []string) error 
 	if strings.Contains(opt.From, "postgresql://") {
 		opt.storageType = "postgres"
 	}
-
-	currentConfig, err := opt.factory.GetConfig()
-	if err != nil {
-		return err
-	}
-	opt.datamkrClient = client.NewWithConfig(currentConfig)
-
 	return nil
 }
 
