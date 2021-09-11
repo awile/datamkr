@@ -31,6 +31,8 @@ func (sc *storageClient) GetStorageWriterService(storageType string, opts Writer
 	switch storageType {
 	case "csv":
 		return newCsvStorageWriter(sc.config, opts)
+	case "postgres":
+		return newPostgresStorageWriter(sc.config, opts)
 	default:
 		return nil
 	}
