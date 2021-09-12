@@ -3,6 +3,7 @@ package config
 type DatamkrConfig struct {
 	DatasetsDir    string                  `yaml:"datasetsDir"`
 	StorageAliases map[string]StorageAlias `yaml:"storage,omitempty"`
+	Version        int32
 }
 
 func (d *DatamkrConfig) GetStorageAlias(alias string) (StorageAlias, bool) {

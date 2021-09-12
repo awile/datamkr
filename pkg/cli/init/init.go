@@ -72,13 +72,15 @@ func (options *InitOptions) Run() error {
 	}
 	options.datamkrClient = client.NewWithConfig(currentConfig)
 
-	datasetPath := "./datasets"
-	if _, dirErr := os.Stat(datasetPath); os.IsNotExist(dirErr) {
-		err = os.MkdirAll(datasetPath, os.ModePerm)
+	if _, dirErr := os.Stat(currentConfig.DatasetsDir); os.IsNotExist(dirErr) {
+		err = os.MkdirAll(currentConfig.DatasetsDir, os.ModePerm)
 		if err != nil {
 			return err
 		}
-		options.createDemoDataDefinition()
+		err = options.createDemoDataDefinition()
+		if err != nil {
+			return err
+		}
 	}
 
 	fmt.Println("Config file created.")

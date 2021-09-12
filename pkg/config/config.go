@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bytes"
 	"io"
 	"log"
 	"os"
@@ -14,7 +15,6 @@ func NewConfig() *DatamkrConfig {
 
 	settings := viper.GetStringMap("datamkr")
 	if len(settings) == 0 {
-		config.DatasetsDir = "./datasets"
 		return &config
 	}
 
@@ -72,22 +72,22 @@ func (dcf *DatamkrConfigFactory) HasConfigInDirectory() (bool, error) {
 }
 
 func (dcf *DatamkrConfigFactory) InitDatamkrConfigFile(configFile io.Writer) error {
-	dcf.config = DatamkrConfig{DatasetsDir: "datasets"}
+	dcf.config = DatamkrConfig{DatasetsDir: "./datasets", Version: 1}
 
 	configByteString, err := dcf.ConfigToByteString()
 	if err != nil {
 		return err
 	}
-
-	_, err = configFile.Write([]byte("version: 2\n\n"))
+	err = viper.ReadConfig(bytes.NewBuffer(configByteString))
 	if err != nil {
 		return err
 	}
 
-	_, err = configFile.Write(configByteString)
+	err = viper.WriteConfig()
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
