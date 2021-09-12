@@ -34,11 +34,8 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "datamkr",
-	Short: "A brief description of your application",
-	Long:  `A Command line tool for mock data generation`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	Short: "A Command line tool for mock data generation",
+	Long:  "A Command line tool for mock data generation",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

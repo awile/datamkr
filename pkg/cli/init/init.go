@@ -3,16 +3,20 @@ package init
 import (
 	"fmt"
 	"log"
+	"os"
 
 	utils "github.com/awile/datamkr/pkg/cli/util"
+	"github.com/awile/datamkr/pkg/client"
 	"github.com/awile/datamkr/pkg/config"
+	"github.com/awile/datamkr/pkg/dataset"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 type InitOptions struct {
-	HasConfig bool
-	factory   config.ConfigFactory
+	HasConfig     bool
+	factory       config.ConfigFactory
+	datamkrClient client.Interface
 }
 
 func NewInitOptions() *InitOptions {
@@ -61,6 +65,36 @@ func (options *InitOptions) Run() error {
 	if err != nil {
 		return err
 	}
+
+	currentConfig, err := options.factory.GetConfig()
+	if err != nil {
+		return err
+	}
+	options.datamkrClient = client.NewWithConfig(currentConfig)
+
+	datasetPath := "./datasets"
+	if _, dirErr := os.Stat(datasetPath); os.IsNotExist(dirErr) {
+		err = os.MkdirAll(datasetPath, os.ModePerm)
+		if err != nil {
+			return err
+		}
+		options.createDemoDataDefinition()
+	}
+
 	fmt.Println("Config file created.")
 	return nil
+}
+
+func (options *InitOptions) createDemoDataDefinition() error {
+	datasetClient := options.datamkrClient.Datasets()
+
+	datasetFields := map[string]dataset.DatasetDefinitionField{
+		"id":        {Type: "uuid"},
+		"name":      {Type: "name"},
+		"email":     {Type: "email"},
+		"password":  {Type: "string"},
+		"isDeleted": {Type: "boolean"},
+	}
+	datasetDefinition := dataset.DatasetDefinition{Fields: datasetFields}
+	return datasetClient.Add("demo", datasetDefinition)
 }

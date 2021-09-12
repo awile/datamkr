@@ -13,20 +13,26 @@ func NewConfig() *DatamkrConfig {
 	var config DatamkrConfig
 
 	settings := viper.GetStringMap("datamkr")
+	if len(settings) == 0 {
+		config.DatasetsDir = "./datasets"
+		return &config
+	}
 
 	config.DatasetsDir = settings["datasetsdir"].(string)
 
-	storageAliases := make(map[string]StorageAlias)
-	configStorageMap := settings["storage"].(map[string]interface{})
-	for storageName := range configStorageMap {
-		var storageAlias StorageAlias
-		storageMap := configStorageMap[storageName].(map[string]interface{})
-		storageAlias.ConnectionString = storageMap["connection"].(string)
-		storageAlias.Table = storageMap["table"].(string)
-		storageAlias.Type = storageMap["type"].(string)
-		storageAliases[storageName] = storageAlias
+	if settings["storage"] != nil {
+		storageAliases := make(map[string]StorageAlias)
+		configStorageMap := settings["storage"].(map[string]interface{})
+		for storageName := range configStorageMap {
+			var storageAlias StorageAlias
+			storageMap := configStorageMap[storageName].(map[string]interface{})
+			storageAlias.ConnectionString = storageMap["connection"].(string)
+			storageAlias.Table = storageMap["table"].(string)
+			storageAlias.Type = storageMap["type"].(string)
+			storageAliases[storageName] = storageAlias
+		}
+		config.StorageAliases = storageAliases
 	}
-	config.StorageAliases = storageAliases
 
 	return &config
 }
@@ -66,7 +72,7 @@ func (dcf *DatamkrConfigFactory) HasConfigInDirectory() (bool, error) {
 }
 
 func (dcf *DatamkrConfigFactory) InitDatamkrConfigFile(configFile io.Writer) error {
-	dcf.config = DatamkrConfig{DatasetsDir: "test/datasets"}
+	dcf.config = DatamkrConfig{DatasetsDir: "datasets"}
 
 	configByteString, err := dcf.ConfigToByteString()
 	if err != nil {
