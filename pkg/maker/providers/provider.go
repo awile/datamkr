@@ -22,6 +22,10 @@ func NewFieldProvider(fieldDefinition dataset.DatasetDefinitionField) (FieldProv
 		return NewEmailWithDefinition(fieldDefinition), nil
 	case "boolean":
 		return NewBooleanWithDefinition(fieldDefinition), nil
+	case "int":
+		return NewIntWithDefinition(fieldDefinition), nil
+	case "datetime":
+		return NewDatetimeWithDefinition(fieldDefinition), nil
 	default:
 		return nil, fmt.Errorf("Field type %s does not exist", fieldDefinition.Type)
 	}
