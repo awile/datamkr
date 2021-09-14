@@ -69,7 +69,7 @@ func initConfig() {
 		// Search config in home directory with name ".datamkr" (without extension).
 		viper.AddConfigPath(".")
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".datamkr")
+		viper.SetConfigName("datamkr")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match

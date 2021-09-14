@@ -14,7 +14,7 @@ datamkr init
 ```
 This creates a few this:
 
-1. `.datamkr.yml` a config file
+1. `datamkr.yml` a config file
 2. `datasets/` a datasets directory to store dataset definitions (can be changed to any path)
 3. `datasets/demo.yml` an example dataset definition
 
