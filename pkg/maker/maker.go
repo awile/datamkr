@@ -10,7 +10,7 @@ import (
 )
 
 type MakerClientInterface interface {
-	MakeRow(definition dataset.DatasetDefinition) (map[string]interface{}, error)
+	MakeRow(definition dataset.DatasetDefinition) (map[string]providers.ProviderField, error)
 }
 
 type MakerClient struct {
@@ -28,15 +28,15 @@ func NewWithConfig(config *config.DatamkrConfig) MakerClientInterface {
 	return &mc
 }
 
-func (mc *MakerClient) MakeRow(definition dataset.DatasetDefinition) (map[string]interface{}, error) {
+func (mc *MakerClient) MakeRow(definition dataset.DatasetDefinition) (map[string]providers.ProviderField, error) {
 	var err error
-	row := make(map[string]interface{}, len(definition.Fields))
+	row := make(map[string]providers.ProviderField, len(definition.Fields))
 	for key, fieldDefinition := range definition.Fields {
-		fieldProvider, err := mc.getProvider(fieldDefinition)
+		provider, err := mc.getProvider(fieldDefinition)
 		if err != nil {
 			break
 		}
-		row[key] = fieldProvider.MakeField()
+		row[key] = provider.MakeField()
 	}
 	return row, err
 }

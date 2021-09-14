@@ -7,7 +7,7 @@ import (
 )
 
 type FieldProviderInterface interface {
-	MakeField() interface{}
+	MakeField() ProviderField
 }
 
 func NewFieldProvider(fieldDefinition dataset.DatasetDefinitionField) (FieldProviderInterface, error) {
@@ -25,4 +25,9 @@ func NewFieldProvider(fieldDefinition dataset.DatasetDefinitionField) (FieldProv
 	default:
 		return nil, fmt.Errorf("Field type %s does not exist", fieldDefinition.Type)
 	}
+}
+
+type ProviderField interface {
+	String() string
+	Value() interface{}
 }

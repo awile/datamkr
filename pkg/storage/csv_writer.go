@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/awile/datamkr/pkg/config"
+	"github.com/awile/datamkr/pkg/maker/providers"
 )
 
 type csvStorageServiceWriter struct {
@@ -61,19 +62,19 @@ func (css *csvStorageServiceWriter) Init() error {
 	return nil
 }
 
-func (css *csvStorageServiceWriter) Write(data map[string]interface{}) error {
+func (css *csvStorageServiceWriter) Write(data map[string]providers.ProviderField) error {
 	if css.Writer == nil {
 		return fmt.Errorf("Must init csv writer first: csvStorageService.Init()\n")
 	}
 	record := make([]string, len(css.HeaderKeys))
 	for i, headerKey := range css.HeaderKeys {
 		value := data[headerKey]
-		record[i] = value.(string)
+		record[i] = value.String()
 	}
 	return css.Writer.Write(record)
 }
 
-func (css *csvStorageServiceWriter) WriteAll(data []map[string]interface{}) error {
+func (css *csvStorageServiceWriter) WriteAll(data []map[string]providers.ProviderField) error {
 	if css.Writer == nil {
 		return fmt.Errorf("Must init csv writer first: csvStorageService.Init()\n")
 	}
@@ -82,7 +83,7 @@ func (css *csvStorageServiceWriter) WriteAll(data []map[string]interface{}) erro
 		record := make([]string, len(css.HeaderKeys))
 		for j, headerKey := range css.HeaderKeys {
 			value := row[headerKey]
-			record[j] = value.(string)
+			record[j] = value.String()
 		}
 		records[i] = record
 	}

@@ -16,7 +16,7 @@ func NewStringWithDefinition(definition dataset.DatasetDefinitionField) FieldPro
 	return &stringFieldMaker{definition: definition}
 }
 
-func (sfm *stringFieldMaker) MakeField() interface{} {
+func (sfm *stringFieldMaker) MakeField() ProviderField {
 	// 65: A, 122: z
 	rand.Seed(time.Now().UnixNano())
 	length := rand.Intn(30) + 5
@@ -31,5 +31,17 @@ func (sfm *stringFieldMaker) MakeField() interface{} {
 		char := string(byte(randInt))
 		randomStr.WriteString(char)
 	}
-	return randomStr.String()
+	return &stringField{value: randomStr.String()}
+}
+
+type stringField struct {
+	value string
+}
+
+func (str *stringField) String() string {
+	return str.value
+}
+
+func (str *stringField) Value() interface{} {
+	return str.value
 }

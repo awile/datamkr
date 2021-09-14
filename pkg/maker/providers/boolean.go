@@ -1,8 +1,8 @@
 package providers
 
 import (
+	"fmt"
 	"math/rand"
-	"strconv"
 
 	"github.com/awile/datamkr/pkg/dataset"
 )
@@ -15,6 +15,19 @@ func NewBooleanWithDefinition(definition dataset.DatasetDefinitionField) FieldPr
 	return &booleanFieldMaker{definition: definition}
 }
 
-func (bfm *booleanFieldMaker) MakeField() interface{} {
-	return strconv.FormatBool(rand.Intn(100) >= 50)
+func (bfm *booleanFieldMaker) MakeField() ProviderField {
+	boolean := rand.Intn(100) >= 50
+	return &booleanField{value: boolean}
+}
+
+type booleanField struct {
+	value bool
+}
+
+func (b *booleanField) String() string {
+	return fmt.Sprintf("%t", b.value)
+}
+
+func (b *booleanField) Value() interface{} {
+	return b.value
 }

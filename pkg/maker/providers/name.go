@@ -14,8 +14,8 @@ func NewNameWithDefinition(definition dataset.DatasetDefinitionField) FieldProvi
 	return &nameFieldMaker{definition: definition}
 }
 
-func (nfm *nameFieldMaker) MakeField() interface{} {
-	return nfm.getName()
+func (nfm *nameFieldMaker) MakeField() ProviderField {
+	return &nameField{value: nfm.getName()}
 }
 
 func (nfm *nameFieldMaker) getName() string {
@@ -73,4 +73,16 @@ func (nfm *nameFieldMaker) getName() string {
 		"Chad Blais",
 	}
 	return names[rand.Intn(len(names))]
+}
+
+type nameField struct {
+	value string
+}
+
+func (name *nameField) String() string {
+	return name.value
+}
+
+func (name *nameField) Value() interface{} {
+	return name.value
 }

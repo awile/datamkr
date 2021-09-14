@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/awile/datamkr/pkg/config"
+	"github.com/awile/datamkr/pkg/maker/providers"
 )
 
 type stdoutStorageServiceWriter struct {
@@ -23,8 +24,13 @@ func (std *stdoutStorageServiceWriter) Init() error {
 	return nil
 }
 
-func (std *stdoutStorageServiceWriter) Write(data map[string]interface{}) error {
-	formattedJson, err := json.MarshalIndent(data, "", "  ")
+func (std *stdoutStorageServiceWriter) Write(data map[string]providers.ProviderField) error {
+	stringMap := make(map[string]string, len(data))
+	for column := range data {
+		stringMap[column] = data[column].String()
+	}
+
+	formattedJson, err := json.MarshalIndent(stringMap, "", "  ")
 	if err != nil {
 		return err
 	}
@@ -32,7 +38,7 @@ func (std *stdoutStorageServiceWriter) Write(data map[string]interface{}) error 
 	return nil
 }
 
-func (std *stdoutStorageServiceWriter) WriteAll(data []map[string]interface{}) error {
+func (std *stdoutStorageServiceWriter) WriteAll(data []map[string]providers.ProviderField) error {
 	return nil
 }
 

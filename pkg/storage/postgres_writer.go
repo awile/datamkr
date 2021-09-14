@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/awile/datamkr/pkg/config"
+	"github.com/awile/datamkr/pkg/maker/providers"
 	_ "github.com/lib/pq"
 )
 
@@ -56,10 +57,10 @@ func (pss *postgresStorageServiceWriter) Init() error {
 	return nil
 }
 
-func (pss *postgresStorageServiceWriter) Write(data map[string]interface{}) error {
+func (pss *postgresStorageServiceWriter) Write(data map[string]providers.ProviderField) error {
 	values := make([]string, len(data))
 	for i, column := range pss.Columns {
-		values[i] = fmt.Sprintf("'%s'", data[column].(string))
+		values[i] = fmt.Sprintf("'%s'", data[column].String())
 	}
 	insert_query := fmt.Sprintf(
 		"INSERT INTO %s (%s) VALUES (%s)",
@@ -75,7 +76,7 @@ func (pss *postgresStorageServiceWriter) Write(data map[string]interface{}) erro
 	return nil
 }
 
-func (pss *postgresStorageServiceWriter) WriteAll(data []map[string]interface{}) error {
+func (pss *postgresStorageServiceWriter) WriteAll(data []map[string]providers.ProviderField) error {
 	tx, err := pss.db.BeginTx(pss.ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
 	if err != nil {
 		return err
@@ -86,7 +87,7 @@ func (pss *postgresStorageServiceWriter) WriteAll(data []map[string]interface{})
 
 		values := make([]string, len(data))
 		for i, column := range pss.Columns {
-			values[i] = row[column].(string)
+			values[i] = row[column].String()
 		}
 
 		insert_query := fmt.Sprintf(

@@ -15,8 +15,9 @@ func NewEmailWithDefinition(definition dataset.DatasetDefinitionField) FieldProv
 	return &emailFieldMaker{definition: definition}
 }
 
-func (efm *emailFieldMaker) MakeField() interface{} {
-	return fmt.Sprintf("%s@%s", efm.getName(), efm.getDomain())
+func (efm *emailFieldMaker) MakeField() ProviderField {
+	emailValue := fmt.Sprintf("%s@%s", efm.getName(), efm.getDomain())
+	return &emailField{value: emailValue}
 }
 
 func (efm *emailFieldMaker) getName() string {
@@ -63,4 +64,16 @@ func (efm *emailFieldMaker) getDomain() string {
 		"gmail.com",
 	}
 	return domains[rand.Intn(len(domains))]
+}
+
+type emailField struct {
+	value string
+}
+
+func (email *emailField) String() string {
+	return email.value
+}
+
+func (email *emailField) Value() interface{} {
+	return email.value
 }
