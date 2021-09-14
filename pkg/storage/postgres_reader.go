@@ -3,6 +3,7 @@ package storage
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 
 	"github.com/awile/datamkr/pkg/config"
 	"github.com/awile/datamkr/pkg/dataset"
@@ -84,6 +85,10 @@ func (pss *postgresStorageServiceReader) getColumnType(column_name string, colum
 		d.Type = "uuid"
 	} else if column_type == "boolean" {
 		d.Type = "boolean"
+	} else if column_type == "bigint" {
+		d.Type = "int"
+	} else if strings.Contains(column_type, "timestamp") {
+		d.Type = "datetime"
 	}
 
 	return d
