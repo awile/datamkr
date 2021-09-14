@@ -27,6 +27,8 @@ func (sc *storageClient) GetStorageServiceWriter(storageType string, opts Writer
 		return newCsvStorageWriter(sc.config, opts)
 	case "postgres":
 		return newPostgresStorageWriter(sc.config, opts)
+	case "std":
+		return newStdoutStorageServiceWriter(sc.config)
 	default:
 		return nil
 	}

@@ -46,7 +46,7 @@ func NewMakeCmd(configFactory *config.DatamkrConfigFactory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Int32VarP(&makeOptions.NumberOfRows, "num", "n", 10, "Number of rows to generate")
+	cmd.Flags().Int32VarP(&makeOptions.NumberOfRows, "num", "n", 5, "Number of rows to generate")
 	cmd.Flags().StringVarP(&makeOptions.Target, "to", "t", "", "Where generated data should go")
 	cmd.Flags().StringVarP(&makeOptions.Fields, "fields", "f", "", "Fields to include (--fields a,b,c)")
 	cmd.Flags().StringVar(&makeOptions.Table, "table", "", "DB table to use (only valid for: --to <db_connection_string>)")
@@ -79,8 +79,8 @@ func (opt *MakeOptions) Complete(cmd *cobra.Command, args []string) error {
 	} else if len(opt.Target) > 4 && opt.Target[len(opt.Target)-4:] == ".csv" {
 		opt.Type = "csv"
 	} else {
-		opt.Target = fmt.Sprintf("%s.csv", args[0])
-		opt.Type = "csv"
+		opt.Target = "stdout"
+		opt.Type = "std"
 	}
 
 	datasetDefinition, err := datasetClient.Get(args[0])
