@@ -5,5 +5,7 @@ type DatasetDefinitionField struct {
 }
 
 type DatasetDefinition struct {
-	Fields map[string]DatasetDefinitionField `yaml:"fields"`
+	Fields   map[string]DatasetDefinitionField `yaml:"fields"`
+	Table    string                            `yaml:"table,omitempty"`
+	Database string                            `yaml:"database,omitempty"`
 }

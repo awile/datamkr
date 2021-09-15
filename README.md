@@ -3,11 +3,11 @@ A CLI for genrating mock data into postgres and csv.
 Datamkr defines data definitions in yaml files that can be checked into source control.
 
 ## Table of Contents
-1. [CSV Usage](#csv-usage)
+1. [Stdout Usage](#stdout-usage)
 2. [Postgres Usage](#postgres-usage)
 3. [Installation](#installation)
 
-# CSV Usage
+# Stdout Usage
 To start using datamkr, first initiate the repo with:
 ```
 datamkr init
@@ -22,11 +22,11 @@ Now we can create mock data using the demo defintion:
 ```
 datamkr make demo
 ```
-This creates a csv file called `demo.csv` and with the columns defined in `datasets/demo.yml` and 10 rows of mock data.
+This prints out 5 rows of data with the columns defined in `datasets/demo.yml`
 
-The verbose version of this command would use the `--to` & `--num` flags to specific the csv filename and how many rows to generate.
+The verbose version of this command would use the flags `--to stdout` & `--num 5`
 ```
-datamkr make demo --to demo.csv --num 10
+datamkr make demo --to stdout --num 5
 ```
 
 All the flags and options can be seen with the `--help` flag or by typing only `datamkr`.
@@ -36,14 +36,13 @@ Datamkr supports populating mock data into postgres as well as creating dataset 
 
 To do this, we will first add our postgres instance as a `storage alias` in our config which will let use easily talk to postgres without typing a postgres connection string over and over again.
 
-Edit the config file (`./datamkr.yml`) should look something like below for connecting to a local postgres db named `test` running on port `5432` with a table called `users` accessible by db role `postgres`
+Edit the config file (`./datamkr.yml`) should look something like below for connecting to a local postgres db named `test` running on port `5432` accessible by db role `postgres`
 ```
 datamkr:
   datasetDir: test/datasets
   storage:
     postgres_local:
       connection: postgresql://postgres@localhost:5432/test?sslmode=disable
-      table: users
       type: postgres
   version: 1
 ```
@@ -54,17 +53,10 @@ Now that we have our postgres storage alias setup we can generate a dataset defi
 datamkr add users --from postgres_local
 ```
 
-[without storage alias]
-`datamkr add users --from postgresql://postgrees@loocalhsot:5432/test?sslmode=disable --table users
-The dataset will be created at `datasets/users.yml` or available datasets can be listed with:
-```
-datamkr list
-```
-
 ### Mock Data Generation
 Now that the dataset is created we can populate the table with 100 records by running the following:
 ```
-datamkr make users --to postgres_local -n 100
+datamkr make users -n 100
 ```
 
 The table should now be populated with mock data.

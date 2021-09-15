@@ -20,6 +20,7 @@ type DatasetAddOptions struct {
 	From        string
 	Table       string
 
+	storageAlias  string
 	storageType   string
 	factory       config.ConfigFactory
 	datamkrClient client.Interface
@@ -70,10 +71,14 @@ func (opt *DatasetAddOptions) Complete(cmd *cobra.Command, args []string) error 
 
 	storageAlias, aliasExists := currentConfig.GetStorageAlias(opt.From)
 	if aliasExists {
+		opt.storageAlias = opt.From
 		if storageAlias.Type == "postgres" {
 			opt.From = storageAlias.ConnectionString
-			opt.Table = storageAlias.Table
 		}
+	}
+
+	if opt.Table == "" {
+		opt.Table = opt.DatasetName
 	}
 
 	var datasetDefinition dataset.DatasetDefinition
@@ -124,6 +129,13 @@ func (opt *DatasetAddOptions) Run() error {
 		if err != nil {
 			return err
 		}
+
+		if opt.storageAlias != "" {
+			datasetDefinition.Database = opt.storageAlias
+		} else {
+			datasetDefinition.Database = opt.From
+		}
+
 		opt.Definition = datasetDefinition
 	}
 

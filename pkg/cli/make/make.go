@@ -23,6 +23,7 @@ type MakeOptions struct {
 	// postgres
 	Table string
 
+	datasetName   string
 	factory       config.ConfigFactory
 	datamkrClient client.Interface
 }
@@ -62,15 +63,29 @@ func (opt *MakeOptions) Complete(cmd *cobra.Command, args []string) error {
 	opt.datamkrClient = client.NewWithConfig(currentConfig)
 	datasetClient := opt.datamkrClient.Datasets()
 
+	opt.datasetName = args[0]
+
 	if len(args) == 0 {
 		return errors.New("Must give which dataset to use:\n\n    datamkr make <dataset_name>\n\nTo check datasets use command: datamkr dataset list\n")
+	}
+
+	datasetDefinition, err := datasetClient.Get(opt.datasetName)
+	if err != nil {
+		return err
+	}
+	opt.DatasetDefinition = datasetDefinition
+
+	if opt.DatasetDefinition.Database != "" {
+		opt.Target = opt.DatasetDefinition.Database
+	}
+	if opt.DatasetDefinition.Table != "" {
+		opt.Table = opt.DatasetDefinition.Table
 	}
 
 	storageAlias, aliasExists := currentConfig.GetStorageAlias(opt.Target)
 	if aliasExists {
 		if storageAlias.Type == "postgres" {
 			opt.Target = storageAlias.ConnectionString
-			opt.Table = storageAlias.Table
 		}
 	}
 
@@ -82,12 +97,6 @@ func (opt *MakeOptions) Complete(cmd *cobra.Command, args []string) error {
 		opt.Target = "stdout"
 		opt.Type = "std"
 	}
-
-	datasetDefinition, err := datasetClient.Get(args[0])
-	if err != nil {
-		return err
-	}
-	opt.DatasetDefinition = datasetDefinition
 
 	return nil
 }
@@ -106,9 +115,7 @@ func (opt *MakeOptions) Run() error {
 	writerOptions := storage.CreateWriterOptions()
 	writerOptions.DatasetDefinition = opt.DatasetDefinition
 	writerOptions.Id = opt.Target
-	if opt.Type == "postgres" {
-		writerOptions.SecondaryId = opt.Table
-	}
+	writerOptions.SecondaryId = opt.Table
 
 	storageWriter := storageClient.GetStorageServiceWriter(opt.Type, writerOptions)
 	if storageWriter == nil {

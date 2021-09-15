@@ -38,6 +38,7 @@ func (pss *postgresStorageServiceReader) Init() error {
 func (pss *postgresStorageServiceReader) GetDatasetDefinition() (dataset.DatasetDefinition, error) {
 	var datasetDefinition dataset.DatasetDefinition
 	datasetDefinition.Fields = make(map[string]dataset.DatasetDefinitionField)
+	datasetDefinition.Table = pss.Table
 
 	column_stmt := fmt.Sprintf("SELECT column_name, data_type, character_maximum_length FROM information_schema.columns where table_name = '%s'", pss.Table)
 	res, err := pss.db.Query(column_stmt)

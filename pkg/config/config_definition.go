@@ -17,6 +17,5 @@ func (d *DatamkrConfig) GetStorageAlias(alias string) (StorageAlias, bool) {
 
 type StorageAlias struct {
 	ConnectionString string `yaml:"connection,omitempty"`
-	Table            string `yaml:"table,omitempty"`
 	Type             string `yaml:"type"`
 }
